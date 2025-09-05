@@ -74,7 +74,65 @@ function MainMenuCredits:init(menu)
                 "",
                 "",
             }
-        }
+        },
+        {
+            "REDHEART",
+            {
+                { "Lead Developers", COLORS.silver },
+                "Blue Rose Red Heart",
+                "",
+                "",
+                "",
+                { "Assets", COLORS.silver },
+                "Toby Fox",
+                "Temmie Chang",
+                "DELTARUNE team",
+                "Micabell",
+                "Discarded_Vessel",
+            },
+            {
+                { "Transcriptions", COLORS.silver },
+                "stormstudios1",
+                "ironinvoker47",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+            }
+        },
+        {
+            "REDHEART",
+            {
+                { "Libraries", COLORS.silver },
+                "Hyperboid",
+                "naii_",
+                "DayBreak",
+                "HmmNoPls",
+                "crocokuo",
+                "skarph",
+                "Diamond Deltahedron",
+                "",
+                "",
+                "",
+            },
+            {
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                ""
+            }
+        },
     }
     self.selected_page = 1
 
