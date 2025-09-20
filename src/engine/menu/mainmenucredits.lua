@@ -116,7 +116,7 @@ function MainMenuCredits:init(menu)
                 "skarph",
                 "Diamond Deltahedron",
                 "ThePlasticPotato",
-                "",
+                "MihBoss",
                 "",
             },
             {
