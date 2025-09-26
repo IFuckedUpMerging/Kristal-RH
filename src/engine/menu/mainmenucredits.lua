@@ -99,8 +99,8 @@ function MainMenuCredits:init(menu)
                 "starcell__",
                 { "Enemy Design", COLORS.silver },
                 "starcell__",
-                "",
-                "",
+                { "\"Chicken In\"", COLORS.silver },
+                "Pigeon Scratch",
                 ""
             }
         },
