@@ -80,7 +80,7 @@ function MainMenuCredits:init(menu)
             {
                 { "Lead Developers", COLORS.silver },
                 "Blue Rose Red Heart",
-                { "Inspiration", COLORS.silver },
+                { "Special Thanks", COLORS.silver },
                 "Mansus Mothman",
                 { "Assets", COLORS.silver },
                 "Toby Fox",
