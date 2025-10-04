@@ -1114,8 +1114,8 @@ function Battle:processAction(action)
         return false
 
     elseif action.action == "ATTACK" or action.action == "AUTOATTACK" then
-        local attacksound = battler.chara:getWeapon():getAttackSound(battler, enemy, action.points) or battler.chara:getAttackSound()
-        local attackpitch  = battler.chara:getWeapon():getAttackPitch(battler, enemy, action.points) or battler.chara:getAttackPitch()
+        local attacksound = battler.chara:getWeapon() and battler.chara:getWeapon():getAttackSound(battler, enemy, action.points) or battler.chara:getAttackSound()
+        local attackpitch  = battler.chara:getWeapon() and battler.chara:getWeapon():getAttackPitch(battler, enemy, action.points) or battler.chara:getAttackPitch()
         local src = Assets.stopAndPlaySound(attacksound or "laz_c")
         src:setPitch(attackpitch or 1)
 
@@ -1159,7 +1159,7 @@ function Battle:processAction(action)
             if damage > 0 then
                 Game:giveTension(Utils.round(enemy:getAttackTension(action.points or 100)))
 
-                local attacksprite = battler.chara:getWeapon():getAttackSprite(battler, enemy, action.points) or battler.chara:getAttackSprite()
+                local attacksprite = battler.chara:getWeapon() and battler.chara:getWeapon():getAttackSprite(battler, enemy, action.points) or battler.chara:getAttackSprite()
                 local dmg_sprite = Sprite(attacksprite or "effects/attack/cut")
                 dmg_sprite:setOrigin(0.5, 0.5)
                 if crit then
@@ -2612,7 +2612,7 @@ end
 
 function Battle:updateIntro()
     self.intro_timer = self.intro_timer + 1 * DTMULT
-    if self.intro_timer >= 15 then -- TODO: find out why this is 15 instead of 13
+    if self.intro_timer >= 13 then
         for _,v in ipairs(self.party) do
             v:setAnimation("battle/idle")
         end
@@ -3341,6 +3341,8 @@ function Battle:handleActionSelectInput(key)
     local actbox = self.battle_ui.action_boxes[self.current_selecting]
     local old_selected_button = actbox.selected_button
 
+    local buttons = actbox:getSelectableButtons()
+
     if Input.isConfirm(key) then
         actbox:select()
         self.ui_select:stop()
@@ -3364,13 +3366,13 @@ function Battle:handleActionSelectInput(key)
     end
 
     if actbox.selected_button < 1 then
-        actbox.selected_button = #actbox.buttons
+        actbox.selected_button = #buttons
     end
 
-    if actbox.selected_button > #actbox.buttons then
+    if actbox.selected_button > #buttons then
         actbox.selected_button = 1
     end
-    
+
     if old_selected_button ~= actbox.selected_button then
         self.ui_move:stop()
         self.ui_move:play()

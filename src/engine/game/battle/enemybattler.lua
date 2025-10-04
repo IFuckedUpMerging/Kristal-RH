@@ -161,11 +161,30 @@ function EnemyBattler:getHealthDisplay()
     return math.ceil((self.health / self.max_health) * 100) .. "%"
 end
 
+--- *(Override)* Get what this enemy's MERCY should display in the enemy select menu.
+--- This should be a string.
+---
+--- By default, returns a percentage.
+---@return string
+function EnemyBattler:getMercyDisplay()
+    return math.ceil(self.mercy) .. "%"
+end
+
 --- *(Override)* Get the default graze tension for this enemy.
 --- Any bullets which don't specify graze tension will use this value.
 ---@return number tension The tension to gain when bullets spawned by this enemy are grazed.
 function EnemyBattler:getGrazeTension()
     return self.graze_tension
+end
+
+---@return bool boolean
+function EnemyBattler:shouldDisplayTiredMessage()
+    return self.tired_percentage > 0
+end
+
+---@return bool boolean
+function EnemyBattler:shouldDisplayAwakeMessage()
+    return true
 end
 
 ---@param bool boolean
@@ -174,7 +193,7 @@ function EnemyBattler:setTired(bool)
     self.tired = bool
     if self.tired then
         self.comment = "(Tired)"
-        if not old_tired and Game:getConfig("tiredMessages") then
+        if not old_tired and Game:getConfig("tiredMessages") and self:shouldDisplayTiredMessage() then
             -- Check for self.parent so setting Tired state in init doesn't crash
             if self.parent then
                 self:statusMessage("msg", "tired")
@@ -183,7 +202,7 @@ function EnemyBattler:setTired(bool)
         end
     else
         self.comment = ""
-        if old_tired and Game:getConfig("awakeMessages") then
+        if old_tired and Game:getConfig("awakeMessages") and self:shouldDisplayAwakeMessage() then
             if self.parent then self:statusMessage("msg", "awake") end
         end
     end
