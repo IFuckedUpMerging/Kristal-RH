@@ -120,9 +120,9 @@ function MainMenuCredits:init(menu)
                 "",
             },
             {
-                "",
-                "",
-                "",
+                { "With Scripts From", COLORS.silver },
+                { "Deltarune: Plugged Dreams", COLORS.silver },
+                "Funkin' Garbage",
                 "",
                 "",
                 "",
