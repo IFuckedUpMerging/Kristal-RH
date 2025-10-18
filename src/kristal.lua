@@ -139,6 +139,7 @@ function love.load(args)
 
     -- default registry
     Registry.initialize()
+    Registry.saveData()
 
     -- Chapter defaults
     Kristal.ChapterConfigs = {}
@@ -542,9 +543,9 @@ function Kristal.onKeyPressed(key, is_repeat)
             love.filesystem.createDirectory("screenshots")
             -- FIXME: the game might freeze when using love.system.openURL to open a file directory
             if (love.system.getOS() == "Windows") then
-                os.execute('start /B \"\" \"'..love.filesystem.getSaveDirectory()..'/screenshots\"')
+                os.execute('start /B \"\" \"' .. love.filesystem.getSaveDirectory() .. '/screenshots\"')
             else
-                love.system.openURL("file://"..love.filesystem.getSaveDirectory().."/screenshots")
+                love.system.openURL("file://" .. love.filesystem.getSaveDirectory() .. "/screenshots")
             end
         elseif key == "f9" then
             love.filesystem.createDirectory("screenshots")
@@ -553,20 +554,23 @@ function Kristal.onKeyPressed(key, is_repeat)
             Assets.playSound("camera_flash")
             SCREENSHOT_DISPLAY = 0
             TAKING_SCREENSHOT = true
-        elseif key == "r" and Input.ctrl() and not console_open then
-            if Kristal.getModOption("hardReset") or Input.alt() and Input.shift() then
-                love.event.quit("restart")
-            else
-                if Mod then
-                    if Input.alt() then
-                        Kristal.quickReload("none")
-                    elseif Input.shift() then
-                        Kristal.quickReload("save")
-                    else
-                        Kristal.quickReload("temp")
-                    end
+        elseif key == "r" and Input.ctrl() and (not console_open) then
+            -- CTRL+R to reload
+            if (not Kristal.isLoading()) and (Kristal.getState() ~= LoadingState) then
+                if Kristal.getModOption("hardReset") or Input.alt() and Input.shift() then
+                    love.event.quit("restart")
                 else
-                    Kristal.returnToMenu()
+                    if Mod then
+                        if Input.alt() then
+                            Kristal.quickReload("none")
+                        elseif Input.shift() then
+                            Kristal.quickReload("save")
+                        else
+                            Kristal.quickReload("temp")
+                        end
+                    else
+                        Kristal.returnToMenu()
+                    end
                 end
             end
         end
@@ -954,6 +958,12 @@ function Kristal.errorHandler(msg, trace_level)
     end
 end
 
+--- Returns whether Kristal is currently loading something.
+---@return boolean loading Whether Kristal is loading something or not.
+function Kristal.isLoading()
+    return Kristal.Loader.waiting > 0
+end
+
 --- Switches the Gamestate to the given one.
 ---@param state table|string The gamestate to switch to.
 ---| "Loading" # The loading state, before entering the main menu.
@@ -1137,12 +1147,16 @@ function Kristal.clearModState()
     package.loaded["src.engine.game.game"] = nil
     Kristal.States["Game"] = require("src.engine.game.game")
     Game = Kristal.States["Game"]
+    Game.chapter = 2
 
     Kristal.setDesiredWindowTitleAndIcon()
 
     -- Restore assets and registry
     Assets.restoreData()
-    Registry.initialize()
+    Registry.restoreData()
+
+    -- force garbage collection
+    collectgarbage("collect")
 end
 
 --- Exits the current mod and returns to the Kristal menu.
@@ -1160,12 +1174,13 @@ function Kristal.returnToMenu()
     end
 
     -- Reload mods and return to memu
-    Kristal.loadAssets("", "mods", "", function ()
+    Kristal.loadAssets("", "mods", "", function()
         Kristal.setDesiredWindowTitleAndIcon()
         Kristal.setState(MainMenu)
     end)
 
     Kristal.DebugSystem:refresh()
+
     -- End input if it's open
     if not Kristal.Console.is_open then
         TextInput.endInput()
@@ -1178,6 +1193,10 @@ end
 ---| "save" # Reloads the mod from the last save.
 ---| "none" # Fully reloads the mod from the start of the game.
 function Kristal.quickReload(mode)
+    if Kristal.isLoading() then
+        error("Attempt to reload while loading")
+    end
+
     -- Temporarily save game variables
     local save, save_id, encounter, shop
     if mode == "temp" then
