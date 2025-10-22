@@ -25,7 +25,7 @@ function Loading:enter(from, dir)
 
     if not Kristal.Config["skipIntro"] then
         self.noise = love.audio.newSource("assets/sounds/kristal_intro.ogg", "static")
-        self.end_noise = love.audio.newSource("assets/sounds/kristal_intro_end.ogg", "static")
+        self.end_noise = love.audio.newSource("assets/sounds/redheart_stinger.ogg", "static")
         self.noise:play()
     else
         self:beginLoad()
