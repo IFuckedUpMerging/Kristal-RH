@@ -55,7 +55,7 @@ function MainMenuTitle:onEnter(old_state)
         self.menu.selected_mod_button = nil
     end
 
-    self.menu.heart_target_x = 196
+    self.menu.heart_target_x = 16
     self.menu.heart_target_y = 238 + 32 * (self.selected_option - 1)
 end
 
@@ -115,18 +115,18 @@ function MainMenuTitle:onKeyPressed(key, is_repeat)
         Assets.stopAndPlaySound("ui_move")
     end
 
-    self.menu.heart_target_x = 196
+    self.menu.heart_target_x = 16
     self.menu.heart_target_y = 238 + (self.selected_option - 1) * 32
 end
 
 function MainMenuTitle:draw()
     local logo_img = self.menu.selected_mod and self.menu.selected_mod.logo or self.logo
 
-    Draw.draw(logo_img, SCREEN_WIDTH/2 - logo_img:getWidth()/2, 105 - logo_img:getHeight()/2)
+    Draw.draw(logo_img, SCREEN_WIDTH - logo_img:getWidth() - 4, SCREEN_HEIGHT - logo_img:getHeight() - 4)
     --Draw.draw(self.selected_mod and self.selected_mod.logo or self.logo, 160, 70)
 
     for i, option in ipairs(self.options) do
-        Draw.printShadow(option[2], 215, 219 + 32 * (i - 1))
+        Draw.printShadow(option[2], 32, 219 + 32 * (i - 1))
     end
 end
 
@@ -139,7 +139,7 @@ function MainMenuTitle:selectOption(id)
         if options[1] == id then
             self.selected_option = i
 
-            self.menu.heart_target_x = 196
+            self.menu.heart_target_x = 16
             self.menu.heart_target_y = 238 + (self.selected_option - 1) * 32
 
             return true
