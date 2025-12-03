@@ -134,7 +134,7 @@ function EnemyBattler:init(actor, use_overlay)
     self.acts = {
         {
             ["name"] = "Check",
-            ["description"] = "",
+            ["description"] = Game:getConfig("checkActDescription") and "Useless\nanalysis" or "",
             ["party"] = {}
         }
     }
@@ -213,8 +213,8 @@ function EnemyBattler:registerAct(name, description, party, tp, highlight, icons
     if type(party) == "string" then
         if party == "all" then
             party = {}
-            for _, chara in ipairs(Game.party) do
-                table.insert(party, chara.id)
+            for _, battler in ipairs(Game.battle.party) do
+                table.insert(party, battler.chara.id)
             end
         else
             party = { party }
@@ -248,7 +248,7 @@ function EnemyBattler:registerShortAct(name, description, party, tp, highlight, 
         if party == "all" then
             party = {}
             for _, battler in ipairs(Game.battle.party) do
-                table.insert(party, battler.id)
+                table.insert(party, battler.chara.id)
             end
         else
             party = { party }
@@ -281,8 +281,8 @@ function EnemyBattler:registerActFor(char, name, description, party, tp, highlig
     if type(party) == "string" then
         if party == "all" then
             party = {}
-            for _, chara in ipairs(Game.party) do
-                table.insert(party, chara.id)
+            for _, battler in ipairs(Game.battle.party) do
+                table.insert(party, battler.chara.id)
             end
         else
             party = { party }
@@ -1053,11 +1053,11 @@ function EnemyBattler:setActor(actor, use_overlay)
     super.setActor(self, actor, use_overlay)
 
     if self.sprite then
-        self.sprite.facing = "left"
+        self.sprite:setFacing("left")
         self.sprite.inherit_color = true
     end
     if self.overlay_sprite then
-        self.overlay_sprite.facing = "left"
+        self.overlay_sprite:setFacing("left")
         self.overlay_sprite.inherit_color = true
     end
 end
