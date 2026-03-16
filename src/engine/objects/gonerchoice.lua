@@ -35,7 +35,7 @@ function GonerChoice:init(x, y, choices, on_complete, on_select)
     self.soul:setColor(Kristal.getSoulColor())
 
     if Kristal.getState() ~= Game and MainMenu.mod_list:getSelectedMod().soulColor then
-        self.soul:setColor(unpack(MainMenu.mod_list:getSelectedMod().soulColor))
+        self.soul:setColor(MainMenu.mod_list:getSelectedMod().soulColor)
     end
 
     self.soul.alpha = 0.6
@@ -207,7 +207,7 @@ function GonerChoice:update()
 
             self:remove()
         end
-    elseif self.state == "CHOICE" then
+    elseif self.state == "CHOICE" and not OVERLAY_OPEN then
         if Input.pressed("left", true) then
             self:moveSelection(self.selected_x - 1, self.selected_y, -1, 0)
         end

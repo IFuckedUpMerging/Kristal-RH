@@ -187,7 +187,7 @@ function Game:registerBuiltInEvents()
     registry:register("forcefield", function(data) return Forcefield(data.x, data.y, getRectData(data), data.properties) end)
     registry:register("pushblock", function(data) return PushBlock(data.x, data.y, getRectData(data), data.properties) end)
     registry:register("tilebutton", function(data) return TileButton(data.x, data.y, getRectData(data), data.properties) end)
-    registry:register("magicglass", function(data) return MagicGlass(data.x, data.y, getRectData(data)) end)
+    registry:register("magicglass", function(data) return MagicGlass(data.x, data.y, getRectData(data), data.properties) end)
     registry:register("warpdoor", function(data) return WarpDoor(data.x, data.y, data.properties) end)
     registry:register("darkfountain", function(data) return DarkFountain(data.x, data.y, data.properties) end)
     registry:register("fountainfloor", function(data) return FountainFloor(data.x, data.y, getRectData(data)) end)
@@ -470,17 +470,17 @@ function Game:load(data, index, fade)
 
     self.lw_money = data.lw_money or 2
 
-    self.border = data.border
-    if not self.border then
-        self.border = self.light and "leaves" or "castle"
-    end
-
     local map = nil
     local room_id = data.room_id or Kristal.getModOption("map")
     if room_id then
         map = Registry.createMap(room_id, self.world)
 
         self.light = map.light or false
+    end
+
+    self.border = data.border
+    if not self.border then
+        self.border = self.light and "leaves" or "castle"
     end
 
     self.default_equip_slots = data.default_equip_slots or 0
@@ -667,6 +667,10 @@ end
 ---@param x? number
 ---@param y? number
 function Game:gameOver(x, y)
+    x, y = x or 0, y or 0
+    if Kristal.callEvent(KRISTAL_EVENT.onGameOver, x, y) then
+        return
+    end
     Kristal.hideBorder(0)
 
     self.state = "GAMEOVER"
@@ -675,7 +679,7 @@ function Game:gameOver(x, y)
         child:remove()
     end
 
-    self.gameover = GameOver(x or 0, y or 0)
+    self.gameover = GameOver(x, y)
     self.stage:addChild(self.gameover)
 end
 
