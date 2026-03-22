@@ -8,4 +8,5 @@ build/
 output/
 
 *.tiled-session
-mods
+
+docs.json
