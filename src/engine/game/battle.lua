@@ -3015,14 +3015,16 @@ function Battle:drawDebug()
     self:debugPrintOutline("State: " .. self.state, 4, 0)
     self:debugPrintOutline("Substate: " .. self.substate, 4, 16)
 
-    self:debugPrintOutline("- KEYS -", 4, 64)
-    self:debugPrintOutline("CTRL+H - heal party", 4, 80)
-    self:debugPrintOutline("CTRL+Y - win battle", 4, 96)
-    self:debugPrintOutline("CTRL+M - pause/resume music", 4, 112)
-    self:debugPrintOutline("CTRL+F - end current wave", 4, 128)
-    self:debugPrintOutline("CTRL+B - kill party", 4, 144)
-    self:debugPrintOutline("CTRL+K - fill tension", 4, 160)
-    self:debugPrintOutline("CTRL+N - toggle noclip", 4, 176)
+    if Kristal.Config["debug"] then
+        self:debugPrintOutline("- KEYS -", 4, 64)
+        self:debugPrintOutline("CTRL+H - heal party", 4, 80)
+        self:debugPrintOutline("CTRL+Y - win battle", 4, 96)
+        self:debugPrintOutline("CTRL+M - pause/resume music", 4, 112)
+        self:debugPrintOutline("CTRL+F - end current wave", 4, 128)
+        self:debugPrintOutline("CTRL+B - kill party", 4, 144)
+        self:debugPrintOutline("CTRL+K - fill tension", 4, 160)
+        self:debugPrintOutline("CTRL+N - toggle noclip", 4, 176)
+    end
 end
 
 function Battle:draw()
@@ -3110,7 +3112,7 @@ end
 --- Resets the enemies index table, closing all gaps in the enemy select menu
 ---@param reset_xact? boolean         Whether to also reset the XACT position
 function Battle:resetEnemiesIndex(reset_xact)
-    self.enemies_index = TableUtils.copy(self.enemies, true)
+    self.enemies_index = TableUtils.copy(self.enemies)
     if reset_xact ~= false then
         self.battle_ui:resetXACTPosition()
     end

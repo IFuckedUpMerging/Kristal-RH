@@ -122,7 +122,7 @@ function Game:enter(previous_state, save_id, save_name, fade)
 
     if next(DISCORD_RPC_PRESENCE) == nil then
         Kristal.setPresence({
-            state = Kristal.callEvent(KRISTAL_EVENT.getPresenceState) or ("Playing " .. (Kristal.getModOption("name") or "a mod")),
+            state = Kristal.callEvent(KRISTAL_EVENT.getPresenceState) or ("Playing " .. (Kristal.getModOption("name") or "a project")),
             details = Kristal.callEvent(KRISTAL_EVENT.getPresenceDetails),
             largeImageKey = Kristal.callEvent(KRISTAL_EVENT.getPresenceImage) or "logo",
             largeImageText = "Kristal v" .. tostring(Kristal.Version),
@@ -176,7 +176,7 @@ function Game:registerBuiltInEvents()
     registry:register("npc", function(data) return NPC(data.properties["actor"], getCharaX(data), getCharaY(data), data.properties) end)
     registry:register("enemy", function(data) return ChaserEnemy(data.properties["actor"], getCharaX(data), getCharaY(data), data.properties) end)
     registry:register("outline", function(data) return Outline(data.x, data.y, getRectData(data)) end)
-    registry:register("silhouette", function(data) return Silhouette(data.x, data.y, getRectData(data)) end)
+    registry:register("silhouette", function(data) return Silhouette(data.x, data.y, getRectData(data), data.properties) end)
     registry:register("slidearea", function(data) return SlideArea(data.x, data.y, getRectData(data), data.properties) end)
     registry:register("mirror", function(data) return MirrorArea(data.x, data.y, getRectData(data), data.properties) end)
     registry:register("chest", function(data) return TreasureChest(data.center_x, data.center_y, data.properties) end)
@@ -491,9 +491,9 @@ function Game:load(data, index, fade)
     end
 
     self.default_storage_slots = data.default_storage_slots or 0
-    -- Check if a mod is still using the deprecated "enableStorage" config
+    -- Check if a project is still using the deprecated "enableStorage" config
     if Game:getConfig("enableStorage") ~= nil then
-        Kristal.Console:warn("Using deprecated mod option 'enableStorage', switch to 'storageSlots' option instead")
+        Kristal.Console:warn("Using deprecated project option 'enableStorage', switch to 'storageSlots' option instead")
         if Game:getConfig("enableStorage") or self.default_storage_slots > 0 then
             self.default_storage_slots = 24
         else
