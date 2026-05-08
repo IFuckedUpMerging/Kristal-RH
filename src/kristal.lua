@@ -488,14 +488,37 @@ function love.keyreleased(key)
     Input.onKeyReleased(key)
 end
 
-function Kristal.onKeyPressed(key, is_repeat)
-    if Input.ctrl() and Input.shift() and Input.alt() and key == "t" and not is_repeat then -- Panic button for binds
-        Input.resetBinds()
-        Input.saveBinds()
-        Assets.playSound("impact")
-        return
+--- Whether or not developer mode is enabled.
+---@return boolean
+function Kristal.isDevMode()
+    if Mod ~= nil then
+        -- We're in a project, so use the project's value... unless overridden
+        return DEBUG_OVERRIDE or Mod.info.dev
     end
 
+    -- We're not in a mod; use our global value
+    return not RELEASE_MODE
+end
+
+--- Whether or not to show the "dev mode enabled" warning.
+---@return boolean
+function Kristal.shouldDisplayDevWarning()
+    if Mod ~= nil then
+        -- We're in a project
+
+        if Mod.info.dev then
+            -- Don't show it, the project allows developer mode
+            return false
+        end
+
+        return DEBUG_OVERRIDE
+    end
+
+    -- We're not even in a project
+    return false
+end
+
+function Kristal.onKeyPressed(key, is_repeat)
     if not TextInput.active and not (Input.gamepad_locked and Input.isGamepad(key)) then
         if not StringUtils.startsWith(key, "gamepad:") then
             Input.active_gamepad = nil
@@ -508,24 +531,44 @@ function Kristal.onKeyPressed(key, is_repeat)
     end
 
     if Input.shouldProcess(key) and not TextInput.active then
-        if Input.is("debug_menu", key) then
-            if Kristal.DebugSystem then
-                Input.clear("debug_menu")
-                if Kristal.DebugSystem:isMenuOpen() then
+        if Input.ctrl() and Input.shift() and Input.alt() and key == "t" and not is_repeat then -- Panic button for binds
+            Input.resetBinds()
+            Input.saveBinds()
+            Assets.playSound("impact")
+            return
+        end
+
+        if Mod ~= nil then
+            if Input.ctrl() and Input.shift() and Input.alt() and key == "m" and not is_repeat then -- Enable developer mode for the current project
+                if not DEBUG_OVERRIDE then
+                    DEBUG_OVERRIDE = true
+                    Assets.playSound("bump")
+                    Assets.playSound("him_quick")
+                end
+                return
+            end
+        end
+
+        if Kristal.isDevMode() then
+            if Input.is("debug_menu", key) then
+                if Kristal.DebugSystem then
+                    Input.clear("debug_menu")
+                    if Kristal.DebugSystem:isMenuOpen() then
+                        Assets.playSound("ui_move")
+                        Kristal.DebugSystem:closeMenu()
+                    else
+                        Kristal.DebugSystem:openMenu()
+                    end
+                end
+            elseif Input.is("console", key) then
+                if Kristal.DebugSystem and Kristal.DebugSystem:isMenuOpen() then
                     Assets.playSound("ui_move")
                     Kristal.DebugSystem:closeMenu()
-                else
-                    Kristal.DebugSystem:openMenu()
-                end
-            end
-        elseif Input.is("console", key) then
-            if Kristal.DebugSystem and Kristal.DebugSystem:isMenuOpen() then
-                Assets.playSound("ui_move")
-                Kristal.DebugSystem:closeMenu()
-            elseif Kristal.Console then
-                if not Kristal.Console.is_open then
-                    Input.clear("console")
-                    Kristal.Console:open()
+                elseif Kristal.Console then
+                    if not Kristal.Console.is_open then
+                        Input.clear("console")
+                        Kristal.Console:open()
+                    end
                 end
             end
         end
@@ -538,18 +581,42 @@ function Kristal.onKeyPressed(key, is_repeat)
     local console_open = Kristal.Console and Kristal.Console.is_open
 
     if not is_repeat and Input.shouldProcess(key) then
-        if key == "f2" or (Input.is("fast_forward", key) and not console_open) then
-            FAST_FORWARD = not FAST_FORWARD
-        elseif key == "f3" then
-            love.system.openURL("https://kristal.cc/wiki")
-        elseif key == "f4" or (key == "return" and Input.alt()) then
+        if Kristal.isDevMode() then
+            -- Developer hotkeys
+            if key == "f2" or (Input.is("fast_forward", key) and not console_open) then
+                FAST_FORWARD = not FAST_FORWARD
+            elseif key == "f3" then
+                love.system.openURL("https://kristal.cc/wiki")
+            elseif key == "f6" then
+                DEBUG_RENDER = not DEBUG_RENDER
+            elseif key == "f8" then
+                print("Hotswapping files...\nNOTE: Might be unstable. If anything goes wrong, it's not our fault :P")
+                Hotswapper.scan()
+            elseif key == "r" and Input.ctrl() and (not console_open) then
+                -- CTRL+R to reload
+                if (not Kristal.isLoading()) and (Kristal.getState() ~= LoadingState) then
+                    if Kristal.getModOption("hardReset") or Input.alt() and Input.shift() then
+                        love.event.quit("restart")
+                    else
+                        if Mod then
+                            if Input.alt() then
+                                Kristal.quickReload("none")
+                            elseif Input.shift() then
+                                Kristal.quickReload("save")
+                            else
+                                Kristal.quickReload("temp")
+                            end
+                        else
+                            Kristal.returnToMenu()
+                        end
+                    end
+                end
+            end
+        end
+
+        if key == "f4" or (key == "return" and Input.alt()) then
             Kristal.Config["fullscreen"] = not Kristal.Config["fullscreen"]
             love.window.setFullscreen(Kristal.Config["fullscreen"])
-        elseif key == "f6" then
-            DEBUG_RENDER = not DEBUG_RENDER
-        elseif key == "f8" then
-            print("Hotswapping files...\nNOTE: Might be unstable. If anything goes wrong, it's not our fault :P")
-            Hotswapper.scan()
         elseif key == "f9" and Input.shift() then
             love.filesystem.createDirectory("screenshots")
             -- FIXME: the game might freeze when using love.system.openURL to open a file directory
@@ -565,25 +632,6 @@ function Kristal.onKeyPressed(key, is_repeat)
             Assets.playSound("camera_flash")
             SCREENSHOT_DISPLAY = 0
             TAKING_SCREENSHOT = true
-        elseif key == "r" and Input.ctrl() and (not console_open) then
-            -- CTRL+R to reload
-            if (not Kristal.isLoading()) and (Kristal.getState() ~= LoadingState) then
-                if Kristal.getModOption("hardReset") or Input.alt() and Input.shift() then
-                    love.event.quit("restart")
-                else
-                    if Mod then
-                        if Input.alt() then
-                            Kristal.quickReload("none")
-                        elseif Input.shift() then
-                            Kristal.quickReload("save")
-                        else
-                            Kristal.quickReload("temp")
-                        end
-                    else
-                        Kristal.returnToMenu()
-                    end
-                end
-            end
         end
     end
 
@@ -1163,12 +1211,30 @@ function Kristal.clearModState()
     -- Clear disruptive active globals
     Object._clearCache()
     Draw._clearStacks()
+
     MOD_LOADING = false
+
     Kristal.LoadedModScripts = {}
+
     -- End the current project
     Kristal.callEvent(KRISTAL_EVENT.unload)
     Kristal.callEvent(KRISTAL_EVENT.cleanup)
     Mod = nil
+
+    DEBUG_OVERRIDE = false
+
+    FAST_FORWARD = false
+    DEBUG_RENDER = false
+
+    -- Close the console or debug menu if open
+    -- (We don't care much if someone "smuggles" them out of the Game state, but we'll try to close them if we can)
+    if Kristal.DebugSystem then
+        Kristal.DebugSystem:closeMenu()
+    end
+
+    if Kristal.Console then
+        Kristal.Console:close()
+    end
 
     Kristal.Mods.clear()
     Kristal.clearModHooks()
@@ -1389,10 +1455,17 @@ function Kristal.loadMod(id, save_id, save_name, after)
         Kristal.LoadedModScripts["libraries." .. lib_id .. ".lib"] = lib
     end
 
+    if Mod.info.dev == nil then
+        -- No explicit dev mode value, default to true
+        Mod.info.dev = true
+    end
+
     Kristal.loadModAssets(mod.id, "all", "", after or function()
         if Kristal.preInitMod(mod.id) then
             Kristal.setDesiredWindowTitleAndIcon()
             Kristal.setState("Game", save_id, save_name)
+            FAST_FORWARD = false
+            DEBUG_RENDER = false
         end
     end)
 
@@ -1704,7 +1777,6 @@ function Kristal.loadConfig()
         fps = 30,
         vSync = false,
         frameSkip = false,
-        debug = false,
         fullscreen = false,
         simplifyVFX = false,
         autoRun = false,

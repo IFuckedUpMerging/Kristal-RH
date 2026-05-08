@@ -1614,10 +1614,11 @@ function DebugSystem:onKeyPressed(key, is_repeat)
             else
                 local option = options[self.current_selecting]
                 if option then
+                    local menu = self.current_menu
                     local failsound = option.func() == false
                     if failsound then
                         Assets.playSound("ui_cant_select")
-                    elseif self.current_menu ~= "sound_test" then
+                    elseif menu ~= "sound_test" then
                         Assets.playSound("ui_select")
                     end
                 end
@@ -1897,6 +1898,10 @@ function DebugSystem:onWheelMoved(x, y)
 end
 
 function DebugSystem:draw()
+    if self.state == "IDLE" and self.menu_anim_timer >= 1 then
+        return
+    end
+
     love.graphics.setFont(self.font)
     Draw.setColor(1, 1, 1, 1)
 
