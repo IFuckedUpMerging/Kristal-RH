@@ -9,12 +9,12 @@
 ---
 --- Also set if command parameter `--mod <id>` is passed to the engine, though this value overrides that.
 ---@type string
-TARGET_MOD = "redheart_chapter_select"
+TARGET_MOD = "rethread"
 
 --- Disables Kristal's built-in Main menu and
 --- immediately loads the target mod.
 ---@type boolean
-AUTO_MOD_START = false
+AUTO_MOD_START = true
 
 --- Controls whether Kristal development-related features are enabled or not.
 ---
