@@ -1,7 +1,7 @@
 ---@class DebugSystem : Object
 ---
 ---@field flag_type             string          The current flag filter setting for value type
----@field flag_query            { [1]: string } The current flag filter query 
+---@field flag_query            { [1]: string } The current flag filter query
 ---@field flag_filter_mode      string          The current flag filter mode
 ---
 ---@field temp_flag_type        string          Temporary version of [`flag_type`](lua://DebugSystem.flag_type). Only set as filter once the settings are saved.
@@ -604,7 +604,7 @@ function DebugSystem:registerSubMenus()
     end)
 
     self:registerOption("engine_option_fps", "Back", "Go back to the previous menu.", function() self:returnMenu() end)
-    
+
     self:registerMenu("fast_forward", "Fast Forward")
     self:registerOption(
         "fast_forward",
@@ -1038,8 +1038,6 @@ function DebugSystem:registerSubMenus()
             end
         )
     end
-
-    -- TODO: toggle rather than only give
 
     self:registerMenu("give_spell", "Give Spell", "search")
 
@@ -1485,7 +1483,11 @@ function DebugSystem:onStateChange(old, new)
         Kristal.showCursor()
     elseif new == "IDLE" then
         self:unselectObject()
-        self.menu_anim_timer = 0
+
+        if old ~= "IDLE" then
+            self.menu_anim_timer = 0
+        end
+
         OVERLAY_OPEN = false
 
         Kristal.hideCursor()
